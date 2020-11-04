@@ -1,0 +1,11 @@
+<h1>login</h1>
+{{usuario}}
+<h2>{{request.user.username}}</h2>
+<h1>listado materias primas</h1>
+{% for mp in materiasprimas  %}
+    <ul>
+        <li><a href="{%url 'mp:modificarMP' id=mp.id %}"> {{mp.Nombre}}</a></li>
+    </ul>
+{% endfor %}
+<a href="{% url 'mp:agregar' %}">Agregar Nueva Materia Prima</a>
+<a href="{% url 'mp:out' %}">salir</a>

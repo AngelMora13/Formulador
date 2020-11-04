@@ -1,0 +1,9 @@
+<h1>Modificar materias primas</h1>
+<h1>{{usuario}}</h1>
+<form method="POST">
+{% csrf_token %}
+
+{{form}}
+
+<input type="submit" value="guardar"/>
+</form>
