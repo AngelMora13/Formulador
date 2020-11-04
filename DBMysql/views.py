@@ -30,15 +30,16 @@ def listadoMP(request):
 
     #crea y guarda una nueva materia prima
     elif request.method=="POST":
-        nuevaMateriaPrima=JSONParser().parse(request)
-        DB_Serializer=DBSerializer(data=nuevaMateriaPrima)
-        if DB_Serializer.is_valid():
-            DB_Serializer.save()
-            return JsonResponse(DB_Serializer.data,status=status.HTTP_201_CREATED)
-        return JsonResponse(DB_Serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        if request.user.is_authenticated:
+            nuevaMateriaPrima=JSONParser().parse(request)
+            DB_Serializer=DBSerializer(data=nuevaMateriaPrima)
+            if DB_Serializer.is_valid():
+                DB_Serializer.save()
+                return JsonResponse(DB_Serializer.data,status=status.HTTP_201_CREATED)
+            return JsonResponse(DB_Serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method=="DELETE":
-        if request.session["user"]: 
+        if request.user.is_authenticated:
             contador=MateriasPrimas.objects.all().delete()
             return JsonResponse({"message":"{} las materias primas fueron eliminadas satisfactoriamente".format(contador[0])},status=status.HTTP_204_NO_CONTENT)
     return JsonResponse({'error': 'authentication failed'})
@@ -54,24 +55,27 @@ def modificar(request,id):
 
     #entregar una materia prima por su id
     if request.method=="GET": 
-        DB_serializer=DBSerializer(materiaPrimaId)
-        return JsonResponse(DB_serializer.data)
+        if request.user.is_authenticated:
+            DB_serializer=DBSerializer(materiaPrimaId)
+            return JsonResponse(DB_serializer.data)
     #actualizar una materia prima pro su id
     elif request.method=="POST":
-        materiaPrima_datos=JSONParser().parse(request)
-        DB_serializer=DBSerializer(materiaPrimaId,data=materiaPrima_datos)
-        if DB_serializer.is_valid():
-            DB_serializer.save()
-            return JsonResponse(DB_serializer.data)
+        if request.user.is_authenticated:
+            materiaPrima_datos=JSONParser().parse(request)
+            DB_serializer=DBSerializer(materiaPrimaId,data=materiaPrima_datos)
+            if DB_serializer.is_valid():
+                DB_serializer.save()
+                return JsonResponse(DB_serializer.data)
 
-        return JsonResponse(DB_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(DB_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
     #ELIMINAR UNA MATERIA PRIMA
     elif request.method=="DELETE":
-        materiaPrimaId.delete()
-        return JsonResponse({'message':'la materia prima fue eliminada de forma satisfactoria'},status=status.HTTP_204_NO_CONTENT)
+        if request.user.is_authenticated:
+            materiaPrimaId.delete()
+            return JsonResponse({'message':'la materia prima fue eliminada de forma satisfactoria'},status=status.HTTP_204_NO_CONTENT)
         
-    return redirect("/api/noautorizado") 
+    return JsonResponse({'error': 'authentication failed'})
 
 def error(request):
     return render(request,"sinPermiso.html") 
