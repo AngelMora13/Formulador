@@ -5,7 +5,9 @@ from requests.api import request
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 
+from django.contrib.auth.decorators import login_required
 
+from loginAdmin.views import login as singup
 
 from DBMysql.models import MateriasPrimas
 from DBMysql.DBSerializer import DBSerializer
@@ -44,9 +46,10 @@ def listadoMP(request):
             return JsonResponse({"message":"{} las materias primas fueron eliminadas satisfactoriamente".format(contador[0])},status=status.HTTP_204_NO_CONTENT)
     return JsonResponse({'error': 'authentication failed'})
 
+
 @api_view(["GET","DELETE","POST"])
 def modificar(request,id):
-        #return JsonResponse({'error': 'authentication failed'})
+    #return JsonResponse({'error': 'authentication failed'})
     #buscar si el elemento id existe
     try:
         materiaPrimaId=MateriasPrimas.objects.get(id=id)
@@ -55,27 +58,31 @@ def modificar(request,id):
 
     #entregar una materia prima por su id
     if request.method=="GET": 
-        if request.user.is_authenticated:
-            DB_serializer=DBSerializer(materiaPrimaId)
-            return JsonResponse(DB_serializer.data)
+        DB_serializer=DBSerializer(materiaPrimaId)
+        return JsonResponse(DB_serializer.data)
     #actualizar una materia prima pro su id
     elif request.method=="POST":
-        if request.user.is_authenticated:
-            materiaPrima_datos=JSONParser().parse(request)
-            DB_serializer=DBSerializer(materiaPrimaId,data=materiaPrima_datos)
-            if DB_serializer.is_valid():
-                DB_serializer.save()
-                return JsonResponse(DB_serializer.data)
+        if request.user.is_authenticated==False:
+            JsonResponse({'error': 'authentication failed'})
+            return redirect("/api/noautorizado")
+        materiaPrima_datos=JSONParser().parse(request)
+        DB_serializer=DBSerializer(materiaPrimaId,data=materiaPrima_datos)
+        if DB_serializer.is_valid():
+            DB_serializer.save()
+            return JsonResponse(DB_serializer.data)
 
-            return JsonResponse(DB_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(DB_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
     #ELIMINAR UNA MATERIA PRIMA
     elif request.method=="DELETE":
-        if request.user.is_authenticated:
-            materiaPrimaId.delete()
-            return JsonResponse({'message':'la materia prima fue eliminada de forma satisfactoria'},status=status.HTTP_204_NO_CONTENT)
+        if request.user.is_authenticated==False:
+            JsonResponse({'error': 'authentication failed'})
+            return redirect("/api/noautorizado")
+        materiaPrimaId.delete()
+        return JsonResponse({'message':'la materia prima fue eliminada de forma satisfactoria'},status=status.HTTP_204_NO_CONTENT)
         
     return JsonResponse({'error': 'authentication failed'})
 
 def error(request):
     return render(request,"sinPermiso.html") 
+

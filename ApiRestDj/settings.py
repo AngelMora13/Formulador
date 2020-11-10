@@ -59,6 +59,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
+    'http://localhost:4200',
 )
 
 ROOT_URLCONF = 'ApiRestDj.urls'
@@ -91,9 +92,9 @@ WSGI_APPLICATION = 'ApiRestDj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'list',
-        'USER':'user',
-        'PASSWORD':'passw',
+        'NAME': 'listadomateriasprimas',
+        'USER':'indigente13',
+        'PASSWORD':'onepiece14',
         'HOST':'localhost',
         'PORT':''
     }

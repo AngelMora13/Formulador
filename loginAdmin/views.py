@@ -1,5 +1,3 @@
-from json.decoder import JSONDecoder
-from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout,authenticate,login as do_login
 from django.contrib.auth.forms import AuthenticationForm
@@ -7,6 +5,8 @@ from django import forms
 
 from django.http.response import JsonResponse
 import requests
+
+
 from rest_framework.parsers import JSONParser
 from rest_framework import status,request
 
@@ -31,7 +31,7 @@ def index(request):
 
 def login(request):
     if request.user.is_authenticated: 
-        return redirect("/loginToAdd/index")
+        return redirect("/loginToAdd/index",{"user":request.user})
     form=AuthenticationForm()
     if request.method=="POST":
         form=AuthenticationForm(data=request.POST)
@@ -39,7 +39,6 @@ def login(request):
         if form.is_valid():
             username=form.cleaned_data["username"]
             password=form.cleaned_data["password"]
-
             user=authenticate(username=username,password=password)
             if user is not None:
                 do_login(request,user)
@@ -74,6 +73,7 @@ class formLogin(forms.Form):
     )
 """
 def modificarMP(request,id):
+    print(request.user.is_authenticated)
     if request.user.is_authenticated: 
         materiasPrimas=requests.get(f"http://localhost:8000/api/materiaprima/{id}")
         mp = materiasPrimas.json()
@@ -87,7 +87,8 @@ def modificarMP(request,id):
             form=formModify(request.POST)
             if form.is_valid():
                 nombre=form.cleaned_data
-                requests.post(f"http://localhost:8000/api/materiaprima/{id}",json=nombre)
+                contraseña=form.cleaned_data["Contraseña"]
+                requests.post(f"http://localhost:8000/api/materiaprima/{id}",json=nombre,auth=(request.user,contraseña))
                 return redirect("/loginToAdd/index")
 
         return render(request,"modificar.html",{"form":form,"id":id})
@@ -99,8 +100,9 @@ def agregarNuevo(request):
         if request.method=="POST":
             form=formModify(request.POST)
             if form.is_valid():
-                form=form.cleaned_data
-                requests.post("http://localhost:8000/api/materiaprima/",json=form)
+                nombre=form.cleaned_data
+                contraseña=form.cleaned_data["Contraseña"]
+                requests.post("http://localhost:8000/api/materiaprima/",json=nombre,auth=(request.user,contraseña))
                 return redirect("/loginToAdd/index")
         return render(request,"agregar.html",{"form":form})
     return redirect("/loginToAdd/login")
@@ -110,4 +112,9 @@ class formModify(forms.Form):
     Humedad=forms.FloatField(label="Humedad")
     Proteina=forms.FloatField(label="Proteina")
     Grasa=forms.FloatField(label="Grasa")
+    Contraseña=forms.CharField(
+        label="contraseña",
+        strip=False,
+        widget=forms.PasswordInput,
+    )
 

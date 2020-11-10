@@ -8,5 +8,6 @@ class MateriasPrimas(models.Model):
     Proteina=models.IntegerField()
     Grasa=models.IntegerField()
 
-
+    def __str__(self):
+        return self.Nombre
     
