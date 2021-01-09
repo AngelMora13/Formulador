@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -93,7 +94,11 @@ WSGI_APPLICATION = 'ApiRestDj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if config('DJANGO_PRODUCTION',default=False, cast=bool):
-    from .settings_production import *
+    DATABASE = {
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL')
+    )
+}
 else:
     DATABASES = {
         'default': {
