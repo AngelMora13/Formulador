@@ -22,6 +22,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/", include("DBMysql.urls")),
-    path("loginToAdd/",include("loginAdmin.urls"))
+    path("api/", include("DBMysql.urls"))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,7 +1,6 @@
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import exceptions, status
-from datetime import datetime
 
 from DBMysql.models import MateriasPrimas, usoFormulador
 from DBMysql.DBSerializer import DBSerializer, usoFormuladorSerializer
