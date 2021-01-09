@@ -97,9 +97,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL')
     )
-    }
-
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -146,4 +144,3 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-

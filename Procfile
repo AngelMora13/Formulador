@@ -1,1 +1,1 @@
-web: gunicorn Formulador.wsgi --log-file -
+web: gunicorn formulador.wsgi --log-file -
