@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'ApiRestDj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASE = {
+DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL')
     )
