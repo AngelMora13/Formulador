@@ -15,6 +15,7 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +31,7 @@ SECRET_KEY = config('SECRET_KEY',default="opg58&f7i5&vu715(@9^s(uz@vis3858_j!-ya
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-
+    
 
 # Application definition
 
@@ -88,20 +89,27 @@ WSGI_APPLICATION = 'ApiRestDj.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+if config('DJANGO_PRODUCTION', default=False, cast=bool):
+    DATABASE = {
+        'default': dj_database_url.config(
+            default=config('DATABASE_URL')
+        )
+    }
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = config('HOST_EMAIL')
+    EMAIL_HOST_USER = config('HOST_EMAIL_USER')
+    EMAIL_HOST_PASSWORD = config('HOST_EMAIL_PASSWORD')
+    EMAIL_PORT = 587
+    
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }}
+    EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL')
-    )
-}
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-}}
-"""
-
+    
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 

@@ -4,11 +4,11 @@ from django.db import models
 
 class MateriasPrimas(models.Model):
     Nombre=models.CharField(max_length=30)
-    Humedad=models.IntegerField()
-    Proteina=models.IntegerField()
-    Grasa=models.IntegerField()
-    Fibra=models.IntegerField()
-    Cenizas=models.IntegerField()
+    Humedad=models.FloatField()
+    Proteina=models.FloatField()
+    Grasa=models.FloatField()
+    Fibra=models.FloatField()
+    Cenizas=models.FloatField()
     
     def __str__(self):
         return self.Nombre

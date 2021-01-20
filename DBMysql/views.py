@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import exceptions, status
@@ -5,6 +6,8 @@ from rest_framework import exceptions, status
 from DBMysql.models import MateriasPrimas, usoFormulador
 from DBMysql.DBSerializer import DBSerializer, usoFormuladorSerializer
 from rest_framework.decorators import api_view
+
+from django.core.mail import EmailMessage
 
 from cvxopt.modeling import op,variable
 
@@ -23,6 +26,29 @@ def listadoMP(request):
         DB_Serializer=DBSerializer(materiaPrima,many=True)
         return JsonResponse(DB_Serializer.data,safe=False)
         #safe=false para onjetos serializer
+
+@api_view(["POST"])
+def enviarCorreo(request):
+    if request.method=="POST":        
+        contenido=JSONParser().parse(request)        
+        email=contenido["correo"]
+        if email:
+            try:
+                enviar_mensaje=EmailMessage(
+                    subject="mensaje FormABA",
+                    body=str(contenido),
+                    from_email=email,
+                    to=[settings.EMAIL_HOST_USER,],
+                )
+                enviar_mensaje.content_subtype="html"
+                enviar_mensaje.send()
+                return JsonResponse({"mensaje":"mensaje eviado con exito"},status=status.HTTP_200_OK)
+            except TypeError:
+                raise exceptions.APIException("No se pudo enviar el mensaje")
+            except ConnectionRefusedError:
+                raise exceptions.APIException("No se pudo enviar el mensaje")
+        else:
+            return JsonResponse({"mensaje":"error en los datos"},status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def formular(request):
