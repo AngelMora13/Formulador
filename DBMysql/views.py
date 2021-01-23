@@ -52,20 +52,26 @@ def enviarCorreo(request):
 
 @api_view(["POST"])
 def formular(request):
-    if request.method=="POS":        
+    if request.method=="POST":        
         valores=JSONParser().parse(request)
-        uso=usoFormulador.objects.all()
-        usoNow={
-            "vecesUsado":uso.vecesUsado+1,
-            "obtencionResultado":uso.obtencionResultado
+        uso=usoFormulador.objects.all().first()
+        if uso is None:
+            usoNow={
+            "vecesUsado":1,
+            "obtencionResultado":0
         }
+        else:
+            usoNow={
+                "vecesUsado":uso.vecesUsado+1,
+                "obtencionResultado":uso.obtencionResultado
+            }
         try:
             minimo=valores[0][0]
             maximo=valores[0][1]
             ingredientesId=valores[1]
         except TypeError:
             raise exceptions.APIException("Error al enviar datos")
-        obj=m1=m2=p1=p2=h1=h2=g1=g2=f1=f2,cenz1=cenz2=0
+        obj=m1=m2=p1=p2=h1=h2=g1=g2=f1=f2=cenz1=cenz2=0
         c=[]
         try:
             for x in ingredientesId:
@@ -113,7 +119,10 @@ def formular(request):
             for x in ingredientesId:
                 x["Masa"]=x["Nombre"].value[0]
                 mp.append(x["Masa"])
-            usoNow["obtencionResultado"]=uso.obtencionResultado+1
+            if uso is None:
+                usoNow["obtencionResultado"]=1
+            else:
+                usoNow["obtencionResultado"]=uso.obtencionResultado+1
             uso_Serializer=usoFormuladorSerializer(uso,data=usoNow)
             if uso_Serializer.is_valid():
                 uso_Serializer.save()

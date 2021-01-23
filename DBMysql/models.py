@@ -17,4 +17,4 @@ class usoFormulador(models.Model):
     obtencionResultado=models.IntegerField()
     fecha=models.DateField(auto_created=True,auto_now=True)
     def __str__(self):
-        return self.vecesUsado
+        return f"veces usado: {self.vecesUsado}"
