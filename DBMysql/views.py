@@ -1,5 +1,8 @@
+from math import isnan
+from typing import Type
 from django.conf import settings
 from django.http.response import JsonResponse
+from requests import api
 from rest_framework.parsers import JSONParser
 from rest_framework import exceptions, status
 
@@ -8,6 +11,8 @@ from DBMysql.DBSerializer import DBSerializer, usoFormuladorSerializer
 from rest_framework.decorators import api_view
 
 from django.core.mail import EmailMessage
+
+import requests
 
 from cvxopt.modeling import op,variable
 
@@ -28,10 +33,51 @@ def listadoMP(request):
         #safe=false para onjetos serializer
 
 @api_view(["POST"])
+def solveCaptcha(request):    
+    if request.method=="POST":  
+        contenido=JSONParser().parse(request)   
+        try:
+            data={
+                'response': contenido["recaptcha"],
+                'secret': settings.RECAPTCHA_SECRET_KEY
+            }
+        except KeyError:
+            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+        except TypeError:
+            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+
+        resp=requests.post("https://www.google.com/recaptcha/api/siteverify",data=data)
+        result_json=resp.json()
+        if result_json["success"]==False:
+            return JsonResponse({"mensaje":"Como sospechaba, eres un Robot"})
+        return JsonResponse({},status=status.HTTP_200_OK)  
+    else:
+        return JsonResponse({"mensaje":"metodo no permitido"},status=status.HTTP_200_OK)      
+
+
+@api_view(["POST"])
 def enviarCorreo(request):
-    if request.method=="POST":        
-        contenido=JSONParser().parse(request)        
-        email=contenido["correo"]
+    if request.method=="POST":      
+        contenido=JSONParser().parse(request)   
+        try:
+            data={
+                'response': contenido["recaptcha"],
+                'secret': settings.RECAPTCHA_SECRET_KEY
+            }
+        except KeyError:
+            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+        except TypeError:
+            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+
+        resp=requests.post("https://www.google.com/recaptcha/api/siteverify",data=data)
+        result_json=resp.json()
+        if result_json["success"]==False:
+            return JsonResponse({"mensaje":"Como sospechaba, eres un Robot"})
+        try:
+            email=contenido["correo"]
+            contenido["recaptcha"]=result_json
+        except KeyError or TypeError:
+            return JsonResponse({"mensaje":"No se adjunto el Correo"})
         if email:
             try:
                 enviar_mensaje=EmailMessage(
@@ -42,13 +88,13 @@ def enviarCorreo(request):
                 )
                 enviar_mensaje.content_subtype="html"
                 enviar_mensaje.send()
-                return JsonResponse({"mensaje":"mensaje eviado con exito"},status=status.HTTP_200_OK)
+                return JsonResponse({},status=status.HTTP_200_OK)
             except TypeError:
-                raise exceptions.APIException("No se pudo enviar el mensaje")
+                return JsonResponse({"mensaje":"No se pudo enviar el mensaje"})
             except ConnectionRefusedError:
-                raise exceptions.APIException("No se pudo enviar el mensaje")
+                return JsonResponse({"mensaje":"No se pudo enviar el mensaje"})            
         else:
-            return JsonResponse({"mensaje":"error en los datos"},status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"mensaje":"error en los datos"})
 
 @api_view(["POST"])
 def formular(request):
@@ -69,8 +115,8 @@ def formular(request):
             minimo=valores[0][0]
             maximo=valores[0][1]
             ingredientesId=valores[1]
-        except TypeError:
-            raise exceptions.APIException("Error al enviar datos")
+        except TypeError or KeyError:
+            return JsonResponse({"mensaje":"error al enviar los datos"})
         obj=m1=m2=p1=p2=h1=h2=g1=g2=f1=f2=cenz1=cenz2=0
         c=[]
         try:
@@ -108,11 +154,11 @@ def formular(request):
             fx=op(obj,c)
             fx.solve(verbose=False,options={'show_progress': False})
         except ZeroDivisionError:
-            raise exceptions.APIException("La Masa esperada no puede ser cero (0)")
+            return JsonResponse({"mensaje":"La Masa esperada no puede ser cero (0)"})
         except TypeError:
-            raise exceptions.APIException("Valor ingresado no numerico")
+            return JsonResponse({"mensaje":"Valor ingresado no numerico"})
         except MateriasPrimas.DoesNotExist:
-            raise exceptions.APIException("El ingrediente no esta en la base de datos, Contactenos")
+            return JsonResponse({"mensaje":"El ingrediente no esta en la base de datos, Contactenos"})
 
         mp=[]
         try:
@@ -130,8 +176,7 @@ def formular(request):
         except TypeError:
             uso_Serializer=usoFormuladorSerializer(uso,data=usoNow)
             if uso_Serializer.is_valid():
-                uso_Serializer.save()
-            raise exceptions.APIException("Los datos suministrados no llevan aun resultado optimo")
+                uso_Serializer.save()            
+            return JsonResponse({"mensaje":"Los datos suministrados no llevan a un resultado optimo"})
     else:
-        return JsonResponse("Metodo no permitido", status=status.HTTP_400_BAD_REQUEST)
-
+        return JsonResponse({"mensaje":"Metodo no permitido"})

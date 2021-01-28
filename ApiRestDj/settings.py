@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'requests',
     'decouple',
     'dj_database_url',
     'gunicorn',
@@ -65,7 +66,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+    'https://formulador-1d40b.web.app',
+)
+
 ROOT_URLCONF = 'ApiRestDj.urls'
 
 TEMPLATES = [
@@ -89,6 +94,7 @@ WSGI_APPLICATION = 'ApiRestDj.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+
 if config('DJANGO_PRODUCTION', default=False, cast=bool):
     DATABASES = {
         'default': dj_database_url.config(
@@ -109,6 +115,7 @@ else:
     }}
     EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 
+RECAPTCHA_SECRET_KEY=config("RECAPTCHA_SECRET_KEY")
     
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
