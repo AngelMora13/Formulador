@@ -1,10 +1,7 @@
-from math import isnan
-from typing import Type
 from django.conf import settings
 from django.http.response import JsonResponse
-from requests import api
 from rest_framework.parsers import JSONParser
-from rest_framework import exceptions, status
+from rest_framework import status
 
 from DBMysql.models import MateriasPrimas, usoFormulador
 from DBMysql.DBSerializer import DBSerializer, usoFormuladorSerializer
@@ -80,14 +77,12 @@ def enviarCorreo(request):
             return JsonResponse({"mensaje":"No se adjunto el Correo"})
         if email:
             try:
-                enviar_mensaje=EmailMessage(
-                    subject="mensaje FormABA",
-                    body=str(contenido),
-                    from_email=email,
-                    to=[settings.EMAIL_HOST_USER,],
-                )
-                enviar_mensaje.content_subtype="html"
-                enviar_mensaje.send()
+                enviar_correo=requests.post("https://api.mailgun.net/v3/"+settings.EMAIL_BASE_URL+"messages",
+                auth = ( "api",settings.EMAIL_API_KEY),
+                data = { "from" :email,
+                    "to" : [settings.EMAIL_BASE_URL,settings.EMAIL_DEFAULT_SEND],
+                    "subject":contenido["asunto"],
+                    "text":str(contenido)})
                 return JsonResponse({},status=status.HTTP_200_OK)
             except TypeError:
                 return JsonResponse({"mensaje":"No se pudo enviar el mensaje"})

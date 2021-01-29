@@ -100,13 +100,7 @@ if config('DJANGO_PRODUCTION', default=False, cast=bool):
         'default': dj_database_url.config(
             default=config('DATABASE_URL')
         )
-    }
-    EMAIL_USE_TLS = True
-    EMAIL_HOST = "smtp.gmail.com"
-    EMAIL_HOST_USER = config('HOST_EMAIL_USER')
-    EMAIL_HOST_PASSWORD = config('HOST_EMAIL_PASSWORD')
-    EMAIL_PORT = 587
-    
+    }    
 else:
     DATABASES = {
         'default': {
@@ -114,9 +108,10 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }}
 
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-
-RECAPTCHA_SECRET_KEY=config("RECAPTCHA_SECRET_KEY")
+EMAIL_API_KEY = config('MAILGUN_API_KEY')
+EMAIL_BASE_URL = config('MAILGUN_BASE_URL')
+EMAIL_DEFAULT_SEND = config('MY_EMAIL')
+RECAPTCHA_SECRET_KEY=config('RECAPTCHA_SECRET_KEY')
     
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
