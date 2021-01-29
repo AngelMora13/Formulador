@@ -102,7 +102,7 @@ if config('DJANGO_PRODUCTION', default=False, cast=bool):
         )
     }
     EMAIL_USE_TLS = True
-    EMAIL_HOST = config('HOST_EMAIL')
+    EMAIL_HOST = "smtp.gmail.com"
     EMAIL_HOST_USER = config('HOST_EMAIL_USER')
     EMAIL_HOST_PASSWORD = config('HOST_EMAIL_PASSWORD')
     EMAIL_PORT = 587
