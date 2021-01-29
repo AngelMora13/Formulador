@@ -77,10 +77,10 @@ def enviarCorreo(request):
             return JsonResponse({"mensaje":"No se adjunto el Correo"})
         if email:
             try:
-                enviar_correo=requests.post("https://api.mailgun.net/v3/"+settings.EMAIL_BASE_URL+"messages",
-                auth = ( "api",settings.EMAIL_API_KEY),
-                data = { "from" :email,
-                    "to" : [settings.EMAIL_BASE_URL,settings.EMAIL_DEFAULT_SEND],
+                enviar_correo=requests.post("https://api.mailgun.net/v3/"+settings.EMAIL_BASE_URL+"/messages",
+                auth = ("api", settings.EMAIL_API_KEY),
+                data = {"from":email,
+                    "to":[settings.EMAIL_DEFAULT_SEND,],
                     "subject":contenido["asunto"],
                     "text":str(contenido)})
                 return JsonResponse({},status=status.HTTP_200_OK)
