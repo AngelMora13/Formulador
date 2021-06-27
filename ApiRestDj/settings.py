@@ -67,9 +67,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = (
-    'formulador-1d40b.web.app',
-)
+CORS_ORIGIN_WHITELIST = [
+    'https://formulador-1d40b.web.app',
+]
 
 ROOT_URLCONF = 'ApiRestDj.urls'
 
