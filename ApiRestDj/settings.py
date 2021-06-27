@@ -30,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY',default="opg58&f7i5&vu715(@9^s(uz@vis3858_j!-ya
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["www.formulador.herokuapp.com"]
+ALLOWED_HOSTS = ["formulador.herokuapp.com"]
     
 
 # Application definition
