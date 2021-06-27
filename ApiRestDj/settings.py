@@ -30,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY',default="opg58&f7i5&vu715(@9^s(uz@vis3858_j!-ya
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["www.formulador.herokuapp.com"]
     
 
 # Application definition
@@ -68,7 +68,7 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
-    'https://formulador-1d40b.web.app',
+    'https://formulador-1d40b.web.app'
 )
 
 ROOT_URLCONF = 'ApiRestDj.urls'
@@ -108,10 +108,7 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }}
 
-EMAIL_API_KEY = config('MAILGUN_API_KEY')
-EMAIL_BASE_URL = config('MAILGUN_BASE_URL')
-EMAIL_DEFAULT_SEND = config('MY_EMAIL')
-RECAPTCHA_SECRET_KEY=config('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_SECRET_KEY=config('RECAPTCHA_SECRET_KEY',default="opg58&f7i5&vu715(@9^s(uz@vis3858_j!-ya4k+_c^+b3_7s")
     
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

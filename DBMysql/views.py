@@ -39,57 +39,18 @@ def solveCaptcha(request):
                 'secret': settings.RECAPTCHA_SECRET_KEY
             }
         except KeyError:
-            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+            return JsonResponse({"mensaje":"No captcha, why you try hack me?"})
         except TypeError:
-            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
+            return JsonResponse({"mensaje":"No captcha, why you try hack me?"})
 
         resp=requests.post("https://www.google.com/recaptcha/api/siteverify",data=data)
         result_json=resp.json()
         if result_json["success"]==False:
-            return JsonResponse({"mensaje":"Como sospechaba, eres un Robot"})
+            return JsonResponse({"mensaje":"As i suspected, you are a bot"})
         return JsonResponse({},status=status.HTTP_200_OK)  
     else:
-        return JsonResponse({"mensaje":"metodo no permitido"},status=status.HTTP_200_OK)      
+        return JsonResponse({"mensaje":"Method not allowed"},status=status.HTTP_200_OK)      
 
-
-@api_view(["POST"])
-def enviarCorreo(request):
-    if request.method=="POST":      
-        contenido=JSONParser().parse(request)   
-        try:
-            data={
-                'response': contenido["recaptcha"],
-                'secret': settings.RECAPTCHA_SECRET_KEY
-            }
-        except KeyError:
-            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
-        except TypeError:
-            return JsonResponse({"mensaje":"No hay captcha, why you try hack me?"})
-
-        resp=requests.post("https://www.google.com/recaptcha/api/siteverify",data=data)
-        result_json=resp.json()
-        if result_json["success"]==False:
-            return JsonResponse({"mensaje":"Como sospechaba, eres un Robot"})
-        try:
-            email=contenido["correo"]
-            contenido["recaptcha"]=result_json
-        except KeyError or TypeError:
-            return JsonResponse({"mensaje":"No se adjunto el Correo"})
-        if email:
-            try:
-                enviar_correo=requests.post("https://api.mailgun.net/v3/"+settings.EMAIL_BASE_URL+"/messages",
-                auth = ("api", settings.EMAIL_API_KEY),
-                data = {"from":email,
-                    "to":[settings.EMAIL_DEFAULT_SEND,],
-                    "subject":contenido["asunto"],
-                    "text":str(contenido)})
-                return JsonResponse({},status=status.HTTP_200_OK)
-            except TypeError:
-                return JsonResponse({"mensaje":"No se pudo enviar el mensaje"})
-            except ConnectionRefusedError:
-                return JsonResponse({"mensaje":"No se pudo enviar el mensaje"})            
-        else:
-            return JsonResponse({"mensaje":"error en los datos"})
 
 @api_view(["POST"])
 def formular(request):
@@ -111,21 +72,20 @@ def formular(request):
             maximo=valores[0][1]
             ingredientesId=valores[1]
         except TypeError or KeyError:
-            return JsonResponse({"mensaje":"error al enviar los datos"})
+            return JsonResponse({"mensaje":"Mistake to send data"})
         obj=m1=m2=p1=p2=h1=h2=g1=g2=f1=f2=cenz1=cenz2=0
         c=[]
         try:
             for x in ingredientesId:
-                x["id"]=MateriasPrimas.objects.get(id=x["id"])
                 x["Nombre"]=variable()
                 c1=(x["Nombre"]>=0)
                 c.append(c1)
                 m1+=x["Nombre"]
-                p1+=x["id"].Proteina*x["Nombre"]
-                h1+=x["id"].Humedad*x["Nombre"]
-                g1+=x["id"].Grasa*x["Nombre"]
-                f1+=x["id"].Fibra*x["Nombre"]
-                cenz1+=x["id"].Cenizas*x["Nombre"]
+                p1+=x["Proteina"]*x["Nombre"]
+                h1+=x["Humedad"]*x["Nombre"]
+                g1+=x["Grasa"]*x["Nombre"]
+                f1+=x["Fibra"]*x["Nombre"]
+                cenz1+=x["Cenizas"]*x["Nombre"]
 
                 obj+=x["Nombre"]
 
@@ -149,16 +109,14 @@ def formular(request):
             fx=op(obj,c)
             fx.solve(verbose=False,options={'show_progress': False})
         except ZeroDivisionError:
-            return JsonResponse({"mensaje":"La Masa esperada no puede ser cero (0)"})
+            return JsonResponse({"mensaje":"Mass expected cannot be zero"})
         except TypeError:
-            return JsonResponse({"mensaje":"Valor ingresado no numerico"})
-        except MateriasPrimas.DoesNotExist:
-            return JsonResponse({"mensaje":"El ingrediente no esta en la base de datos, Contactenos"})
-
+            return JsonResponse({"mensaje":"Non-numeric entered value"})
+            
         mp=[]
         try:
             for x in ingredientesId:
-                x["Masa"]=x["Nombre"].value[0]
+                x["Masa"]=round(x["Nombre"].value[0],4)
                 mp.append(x["Masa"])
             if uso is None:
                 usoNow["obtencionResultado"]=1
@@ -172,6 +130,6 @@ def formular(request):
             uso_Serializer=usoFormuladorSerializer(uso,data=usoNow)
             if uso_Serializer.is_valid():
                 uso_Serializer.save()            
-            return JsonResponse({"mensaje":"Los datos suministrados no llevan a un resultado optimo"})
+            return JsonResponse({"mensaje":"Data cannot match to an optimum result"})
     else:
-        return JsonResponse({"mensaje":"Metodo no permitido"})
+        return JsonResponse({"mensaje":"Method not allowed"})
